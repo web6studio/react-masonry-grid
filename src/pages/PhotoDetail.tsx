@@ -10,9 +10,24 @@ const PhotoDetail = () => {
   const { data: photo, isLoading, isError, error } = usePhoto(id);
   const navigate = useNavigate();
 
-  if (isLoading) return <Loader />;
-  if (isError) return <ErrorMessage error={error} />;
-  if (!photo) return <ErrorMessage error={new Error("Photo not found")} />;
+  if (isLoading)
+    return (
+      <LoaderWrapper>
+        <Loader />
+      </LoaderWrapper>
+    );
+  if (isError)
+    return (
+      <LoaderWrapper>
+        <ErrorMessage error={error} />
+      </LoaderWrapper>
+    );
+  if (!photo)
+    return (
+      <LoaderWrapper>
+        <ErrorMessage error={new Error("Photo not found")} />
+      </LoaderWrapper>
+    );
 
   return (
     <Wrapper>
@@ -42,6 +57,13 @@ const Wrapper = styled.div`
   margin: 0 auto;
   padding: 2rem 1rem;
   color: ${({ theme }) => theme.colors.text};
+`;
+
+const LoaderWrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const BackButton = styled.button`

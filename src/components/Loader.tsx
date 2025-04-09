@@ -6,7 +6,7 @@ const spin = keyframes`
   }
 `;
 
-const Spinner = styled.div`
+const Loader = styled.div`
   width: 36px;
   height: 36px;
   border: 4px solid ${({ theme }) => theme.colors.primary};
@@ -14,20 +14,5 @@ const Spinner = styled.div`
   border-radius: 50%;
   animation: ${spin} 1s linear infinite;
 `;
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  height: 100%;
-  max-height: 100vh;
-`;
-
-const Loader = () => (
-  <Wrapper>
-    <Spinner />
-  </Wrapper>
-);
 
 export default Loader;

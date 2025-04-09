@@ -62,18 +62,27 @@ const Gallery = () => {
         <SearchInput onChange={setQuery} value={query} />
       </SearchWrapper>
 
-      <Content style={{ height: rowVirtualizer.getTotalSize() }}>
-        {isLoading && <Loader />}
+      {isLoading && (
+        <LoaderWrapper>
+          <Loader />
+        </LoaderWrapper>
+      )}
 
-        {isError && <ErrorMessage error={error} />}
+      {isError && (
+        <LoaderWrapper>
+          <ErrorMessage error={error} />
+        </LoaderWrapper>
+      )}
 
-        {!isLoading && !isError && photos.length === 0 && (
+      {!isLoading && !isError && photos.length === 0 && (
+        <LoaderWrapper>
           <NoResults>😕 No photos found</NoResults>
-        )}
+        </LoaderWrapper>
+      )}
 
-        {!isLoading &&
-          !isError &&
-          rowVirtualizer.getVirtualItems().map((virtualRow) => {
+      {!isLoading && !isError && (
+        <Content style={{ height: rowVirtualizer.getTotalSize() }}>
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const rowIndex = virtualRow.index;
             const start = rowIndex * columnCount;
             const end = start + columnCount;
@@ -98,7 +107,8 @@ const Gallery = () => {
               </GridRow>
             );
           })}
-      </Content>
+        </Content>
+      )}
 
       {isFetchingNextPage && <Loader />}
     </Container>
@@ -116,6 +126,7 @@ const Container = styled.div`
 const SearchWrapper = styled.div`
   max-width: 640px;
   margin: 0 auto 2rem auto;
+  padding: 0 1rem;
 `;
 
 const Content = styled.div`
@@ -158,8 +169,14 @@ const Photo = styled.img`
 `;
 
 const NoResults = styled.p`
-  text-align: center;
   padding: 3rem 1rem;
   font-size: 1.25rem;
   color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const LoaderWrapper = styled.div`
+  height: calc(100vh - 180px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
