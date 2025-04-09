@@ -1,15 +1,31 @@
 const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = import.meta.env.VITE_BASE_URL || "https://api.pexels.com/v1";
 
-export const fetchPhotos = async (page: number, perPage = 30) => {
-  const res = await fetch(
-    `${BASE_URL}/curated?page=${page}&per_page=${perPage}`,
-    {
-      headers: {
-        Authorization: API_KEY,
-      },
-    }
-  );
+let abortController: AbortController | null = null;
+
+export const fetchPhotos = async (
+  page: number,
+  perPage = 30,
+  query?: string
+) => {
+  if (abortController) {
+    abortController.abort(); // cancel previous request
+  }
+
+  abortController = new AbortController();
+
+  const url = query?.length
+    ? `${BASE_URL}/search?query=${encodeURIComponent(
+        query
+      )}&page=${page}&per_page=${perPage}`
+    : `${BASE_URL}/curated?page=${page}&per_page=${perPage}`;
+
+  const res = await fetch(url, {
+    signal: abortController.signal,
+    headers: {
+      Authorization: API_KEY,
+    },
+  });
 
   if (!res.ok) {
     const errorBody = await res.json();

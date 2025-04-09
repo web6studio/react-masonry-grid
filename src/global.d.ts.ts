@@ -8,6 +8,7 @@ declare module "styled-components" {
       text: string;
       textSecondary: string;
       error: string;
+      border: string;
     };
     radius: string;
   }

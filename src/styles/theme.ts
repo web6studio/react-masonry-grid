@@ -7,6 +7,7 @@ export const theme: DefaultTheme = {
     text: "#1A1A1A",
     textSecondary: "#555",
     error: "#E53935",
+    border: "#BBB",
   },
   radius: "12px",
 };

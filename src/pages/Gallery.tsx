@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Link } from "react-router";
 import styled from "styled-components";
@@ -6,13 +6,15 @@ import styled from "styled-components";
 import usePhotos from "../hooks/usePhotos";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
+import SearchInput from "../components/SearchInput";
 
-const ITEM_HEIGHT = 340;
-const COLUMN_WIDTH = 340;
-const GAP = 24;
+const ITEM_HEIGHT = 375;
+const COLUMN_WIDTH = 375;
+const GAP = 25;
 
 const Gallery = () => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
 
   const {
     data,
@@ -22,7 +24,7 @@ const Gallery = () => {
     isLoading,
     isError,
     error,
-  } = usePhotos();
+  } = usePhotos(query);
 
   const photos = data?.pages.flatMap((page) => page.photos) ?? [];
 
@@ -54,52 +56,69 @@ const Gallery = () => {
     isFetchingNextPage,
   ]);
 
-  if (isLoading) return <Loader />;
-  if (isError) return <ErrorMessage error={error} />;
-
   return (
-    <Wrapper ref={parentRef}>
-      <Content style={{ height: rowVirtualizer.getTotalSize() }}>
-        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-          const rowIndex = virtualRow.index;
-          const start = rowIndex * columnCount;
-          const end = start + columnCount;
-          const items = photos.slice(start, end);
+    <Container ref={parentRef}>
+      <SearchWrapper>
+        <SearchInput onChange={setQuery} value={query} />
+      </SearchWrapper>
 
-          return (
-            <GridRow
-              key={rowIndex}
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
-            >
-              {items.map((photo, colIndex) => (
-                <StyledLink
-                  to={`/photo/${photo.id}`}
-                  key={`${photo.id}-${rowIndex}-${colIndex}`}
-                >
-                  <Photo src={photo.src.medium} alt={photo.alt || "Photo"} />
-                </StyledLink>
-              ))}
-            </GridRow>
-          );
-        })}
+      <Content style={{ height: rowVirtualizer.getTotalSize() }}>
+        {isLoading && <Loader />}
+
+        {isError && <ErrorMessage error={error} />}
+
+        {!isLoading && !isError && photos.length === 0 && (
+          <NoResults>😕 No photos found</NoResults>
+        )}
+
+        {!isLoading &&
+          !isError &&
+          rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const rowIndex = virtualRow.index;
+            const start = rowIndex * columnCount;
+            const end = start + columnCount;
+            const items = photos.slice(start, end);
+
+            return (
+              <GridRow
+                key={rowIndex}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  transform: `translateY(${virtualRow.start}px)`,
+                  width: "100%",
+                }}
+              >
+                {items.map((photo) => (
+                  <StyledLink to={`/photo/${photo.id}`} key={photo.id}>
+                    <Photo src={photo.src.medium} alt={photo.alt || "Photo"} />
+                  </StyledLink>
+                ))}
+              </GridRow>
+            );
+          })}
       </Content>
 
       {isFetchingNextPage && <Loader />}
-    </Wrapper>
+    </Container>
   );
 };
 
 export default Gallery;
 
-const Wrapper = styled.div`
+const Container = styled.div`
   height: 100vh;
   overflow: auto;
-  display: flex;
-  justify-content: center;
+  padding: 1.5rem 1rem;
+`;
+
+const SearchWrapper = styled.div`
+  max-width: 640px;
+  margin: 0 auto 2rem auto;
 `;
 
 const Content = styled.div`
-  width: 100%;
   position: relative;
 `;
 
@@ -108,10 +127,6 @@ const GridRow = styled.div`
   justify-content: center;
   gap: ${GAP}px;
   padding: 0 1rem;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
 `;
 
 const StyledLink = styled(Link)`
@@ -140,4 +155,11 @@ const Photo = styled.img`
   height: 100%;
   object-fit: cover;
   display: block;
+`;
+
+const NoResults = styled.p`
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 1.25rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;

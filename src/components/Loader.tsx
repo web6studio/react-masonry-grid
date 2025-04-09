@@ -20,7 +20,8 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  height: 100vh;
+  height: 100%;
+  max-height: 100vh;
 `;
 
 const Loader = () => (
